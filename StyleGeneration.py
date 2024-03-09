@@ -6,7 +6,7 @@ from stability_sdk import client
 import stability_sdk.interfaces.gooseai.generation.generation_pb2 as generation
 
 # Generates the style image from a text prompt, will be called multiple times if user is not happy with style produced, either with same or different prompt
-def StyleGenerator(in_prompt, dest = ""):
+def StyleGenerator(in_prompt, abs = ""):
     # Our Host URL should not be prepended with "https" nor should it have a trailing slash.
     os.environ['STABILITY_HOST'] = 'grpc.stability.ai:443'
 
@@ -55,7 +55,4 @@ def StyleGenerator(in_prompt, dest = ""):
             if artifact.type == generation.ARTIFACT_IMAGE:
                 global img
                 img = Image.open(io.BytesIO(artifact.binary))
-                img.save(dest + str(artifact.seed)+ ".png") # Save our generated images with their seed number as the filename.
-                fname = dest + str(artifact.seed)+ ".png"
-
-    return fname
+                img.save(abs) # Save our generated images with their seed number as the filename.
