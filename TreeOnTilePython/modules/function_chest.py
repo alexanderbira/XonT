@@ -7,7 +7,8 @@ from random import uniform
 
 print(os.getcwd())
 
-
+test_source = '/Users/lawanfathullah/Documents/TreeOnTilePython/blender_files/anya.obj'
+test_dest = './blender_files/resultThingie.obj'
 
 # This function takes a collection of objs (e.g. bpy.data.objs)
 # and sets the first objeect to be a parent of all others.
@@ -158,23 +159,24 @@ def placeObjectOn(obj, binding_obj, margin = 0, scaleUp = False):
 # Exports a .obj file at destination.
 def runPlaceObject():
     # Then import the tiles.
-    bpy.ops.import_scene.obj(filepath=tile_path_absolute)
+    # bpy.ops.import_scene.obj(filepath=tile_path_absolute)
     squareTile = bpy.data.objects['squareTile']
 
     # Import the 3D model and make them a family.
-    bpy.ops.import_scene.obj(filepath=source_path_absolute)
+    bpy.ops.wm.obj_import(filepath=test_source)
     family = bpy.context.selected_objects
-    parent_obj = create_family(family)
+    if len(family) > 0:
+        parent_obj = create_family(family)
+        parent_obj.rotation_euler.x -= radians(90)
 
-    # Place the object on the square tile
-    placeObjectOn(parent_obj, squareTile, 0.2, True)
-    placeObjectOn(parent_obj, squareTile, 0.2, True)
+        # Place the object on the square tile
+        placeObjectOn(parent_obj, squareTile, 0.2, True)
+
 
     # Remove the square tile, leaving only the hexagon tile.
     bpy.data.objects.remove(squareTile)
 
     # Export file as obj.
-    bpy.ops.wm.obj_export(filepath=destination_path_absolute)
+    bpy.ops.wm.obj_export(filepath=test_dest)
 
-
-bpy.ops.wm.obj_export(filepath=destination_path_absolute)
+runPlaceObject()
