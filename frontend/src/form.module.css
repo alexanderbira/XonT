@@ -50,9 +50,13 @@
 }
 
 .imgInputText {
-  background-color: rgba(71, 71, 71, 0.8);
+  text-shadow: rgb(71, 71, 71) 0px 0px 4px;
+  text-align: center;
   padding: 15px;
   border-radius: 8px;
+  -webkit-text-stroke: black 1px;
+  -webkit-text-fill-color: white;
+  font-weight: 800;
 }
 
 .submitButton {

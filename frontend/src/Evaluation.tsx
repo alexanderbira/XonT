@@ -12,6 +12,7 @@ interface EvaluationProps {
 
 export default function Evaluation({ socket }: EvaluationProps) {
   const [loaded, setLoaded] = React.useState(false);
+  const [extraPromptEmpty, setExtraPromptEmpty] = React.useState(true);
 
   const navigate = useNavigate();
 
@@ -33,7 +34,10 @@ export default function Evaluation({ socket }: EvaluationProps) {
         },
         method: "POST",
         body: JSON.stringify({ prompt: extraPrompt })
-      }).then(() => setLoaded(false))
+      }).then(() => {
+        setLoaded(false);
+        setExtraPromptEmpty(true);
+      })
   }
 
   return (
@@ -41,7 +45,7 @@ export default function Evaluation({ socket }: EvaluationProps) {
       {
         loaded ?
           <div>
-            <h1>Image Style Check</h1>
+            <h1 style={{textAlign: "center"}}>Image Style Check</h1>
             <img
               src={`/evaluate-img.png?${new Date().getTime()}`}
               alt="sample style reference"
@@ -51,7 +55,17 @@ export default function Evaluation({ socket }: EvaluationProps) {
               Is this an acceptable style for your project?
             </p>
             <div className={evaluationStyles.judgeButtons}>
-              <button onClick={acceptImage}>Yes</button>
+              <button
+                onClick={acceptImage}
+                disabled={!extraPromptEmpty}
+                title={
+                  extraPromptEmpty ?
+                  "" :
+                  "Delete the text in the box below to accept image"
+                }
+              >
+                Yes
+              </button>
               <button onClick={rejectImage}>No</button>
             </div>
             <p>
@@ -63,6 +77,9 @@ export default function Evaluation({ socket }: EvaluationProps) {
               className={evaluationStyles.extraPrompt}
               placeholder="comma-separated descriptive words"
               rows={4}
+              onChange={e => {
+                setExtraPromptEmpty(e.target.value === "")
+              }}
             ></textarea>
           </div>
           :
