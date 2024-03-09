@@ -1,0 +1,16 @@
+.wrapper {
+  width: 100vw;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+}
+
+.content {
+  max-width: 700px;
+  margin-top: 200px;
+  padding: 20px;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+}
+
