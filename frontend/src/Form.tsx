@@ -1,9 +1,12 @@
 import React from "react";
 
 import formStyles from "./form.module.css";
+import { useNavigate } from "react-router-dom";
 
 export default function Form() {
   const [objects, setObjects] = React.useState([""]);
+
+  const navigate = useNavigate();
 
   const addBox = () => {
     const newObjects = [...objects];
@@ -17,17 +20,47 @@ export default function Form() {
     );
   }
 
+  const submitForm: React.FormEventHandler<HTMLFormElement> = (e) => {
+    e.preventDefault();
+    const formData = new FormData(
+      document.getElementById("form")! as HTMLFormElement
+    );
+    fetch("/submit-form", {
+      method: "post",
+      body: formData
+    }).then(res => {
+      if (!res.ok) {
+        alert("an unexpected error was encountered")
+        return
+      }
+      res.json().then(json => {
+        if (json["success"]) {
+          if (json["success"] === "generating style image...") {
+            navigate("/evaluate-image");
+          } else {
+            navigate("/results");
+          }
+        } else {
+          alert("err: " + JSON.stringify(json));
+        }
+      })
+    });
+  }
+
   return (
     <form
-      action="submit-form"
+      onSubmit={submitForm}
       method="POST"
       encType="multipart/form-data"
+      id="form"
     >
       <p>What objects would you like to generate models for?</p>
       <div className={formStyles.textBoxes} id="inputBoxes">
         {
           objects.map((object, i) =>
             <input
+              placeholder={i === 0 ? "e.g. tree" : ""}
+              required={i === 0}
               type="text"
               key={i}
               name={`object-${i}`}
@@ -36,12 +69,6 @@ export default function Form() {
                 const newObjects = [...objects];
                 newObjects[i] = e.target.value;
                 setObjects(newObjects);
-              }}
-              onKeyDownCapture={e => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  addBox();
-                }
               }}
             />
           )

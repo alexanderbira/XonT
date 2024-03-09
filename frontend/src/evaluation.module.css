@@ -1,0 +1,47 @@
+.refImage {
+  max-width: 100%;
+}
+
+.judgeButtons {
+  display: flex;
+  width: 100%;
+  justify-content: stretch;
+}
+
+.judgeButtons button {
+  width: 50%;
+  height: 70px;
+  margin-top: 15px;
+  margin-bottom: 15px;
+  border: none;
+  cursor: pointer;
+  transition-duration: .3s;
+  border-radius: 5px;
+  color: white;
+  font-size: 1.5rem;
+}
+
+.judgeButtons button:first-child {
+  margin-right: 5px;
+  background-color: rgb(83, 128, 83);
+}
+
+.judgeButtons button:last-child {
+  margin-left: 5px;
+  background-color: rgb(162, 78, 78);
+}
+
+.judgeButtons button:hover {
+  filter: brightness(0.9);
+}
+
+.extraPrompt {
+  width: 100%;
+  resize: none;
+}
+
+.question {
+  font-size: 1.5rem;
+  text-align: center;
+  margin-bottom: 0;
+}
