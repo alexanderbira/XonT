@@ -1,43 +1,37 @@
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, send_from_directory, render_template, request
 import os
 from werkzeug.utils import secure_filename
+from flask_socketio import SocketIO
+
+### global variables (im sorry there has to be a better way but im tired)
+objectDict = {}
 
 
-app = Flask(__name__)
+### flask stuff
+
+app = Flask(__name__, 
+            template_folder="frontend/build", 
+            static_folder="frontend/build/static",
+            static_url_path=''
+            )
 app.config["UPLOAD_FOLDER"] = "images/"
+socketio = SocketIO(app)
 
 @app.route("/") 
-def home():
+def serve():
+  return send_from_directory(app.static_folder, 'index.html')
 
-  return render_template('index.html')
-
-@app.route("/form-submission", methods = ["POST"])
+@app.route("/submit-form", methods = ["POST"])
 def form_submission():
-  #objectList = request.form.get("object-list")
-  """ styleImage = request.files["style-image"]
-  filename = secure_filename(styleImage.filename)
-  filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-  print(styleImage.filename)
-  styleImage.save("images/Capture.PNG")
-  return jsonify({
-    "message": "Success!"
-  })
-   """
-  """ if 'style-image' not in request.files:
-    return jsonify({"error": "no file part nooo D:"})
-  file = request.files['style-image']
+  # dealing with the object list
+  global objectDict
+  for key in request.form:
+    if key.startswith("object-"):
+      objectDict[key] = request.form[key]
   
-  if file.filename == '':
-    return jsonify({"error": "No file submitted nooo D:"})
-  
-  os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
-  filename = secure_filename(file.filename)
-  try:
-    file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-    return jsonify({"success": "so win"})
-  except Exception as e:
-    return jsonify({"error": str(e)}), 500 """
-  return jsonify(tackleFiles("style-image", request.files))
+  # dealing with the style image
+  tackleFiles("style-image", request.files)
+  return 
   
 def tackleFiles(inputFile, requestFiles):
   if inputFile not in requestFiles:
@@ -54,9 +48,8 @@ def tackleFiles(inputFile, requestFiles):
   
   os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
   
-  filename = secure_filename(file.filename)
   try:
-    file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
+    file.save(os.path.join(app.config["UPLOAD_FOLDER"], "style_image.png"))
     return {
       "success": "so win"
       }
@@ -66,14 +59,29 @@ def tackleFiles(inputFile, requestFiles):
       "file": inputFile
     }
 
-@app.route("/example-api")
+""" @app.route("/example-api")
 def secret():
   return jsonify({
     "name": "bob",
     "email": "bob@outlook.com"
   })
 
+ """
 
+### socket stuff
 
+@socketio.on("evaluate-image"):
+  ### RUN SANIS FUNCTION
 
-app.run()
+@socketio.on("3d-object"):
+  ### RUN SANIS FUNCTION ON THE REST OF THE OBJECTS (IF APPLICABLE)
+  ### RUN MO N LAWAN SO THAT 3D OBJECT IS RETURNED
+
+### running
+
+socketio.run(app)
+
+##### from sani, assume we have functions:
+## generateInitialObject(object: str, styleImage: imagefile = null): imagefile (im so kotlin brained)
+#### this function should be given the input object, i.e., the first object in the object list,
+#### and the style image if one exists, and then should generate an image of an object a game dev could use
