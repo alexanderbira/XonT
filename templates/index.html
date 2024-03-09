@@ -10,6 +10,10 @@
 <body>
   <h1>Example Page</h1>
   <p id="paragraph"></p>
+  <form action="form-submission" method = "POST" enctype="multipart/form-data">
+    <input type = "file" name="style-image"/>
+    <input type = "submit"/>
+  </form>
 
   <script>
     fetch("/example-api")
