@@ -5,7 +5,6 @@ from math import radians
 
 dir_path_list = os.path.dirname(__file__).split("/")[:-2]
 x_on_t_path = '/'.join(dir_path_list)
-print(x_on_t_path)
 
 # Loading source paths and destination paths.
 src_model_dir = x_on_t_path + '/images/models'
