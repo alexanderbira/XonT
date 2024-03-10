@@ -1,14 +1,17 @@
 import bpy
-import sys
 import os
-from runScript import tile_path_absolute, source_path_absolute, destination_path_absolute
 from math import radians
-from random import uniform
 
-print(os.getcwd())
+# Loading source paths and destination paths.
+src_model_dir = os.path.abspath('images/models')
+dest_model_dir = os.path.abspath('images/tiles')
+src_paths = ['images/models' + file_name for file_name in os.listdir(src_model_dir)]
+dest_paths = ['images/tiles' + file_name for file_name in os.listdir(src_model_dir)]
+# Path to base tile.
+tile_path = os.path.abspath('TreeOnTilePython/baseTiles/baseTile.obj')
 
-test_source = '/Users/lawanfathullah/Documents/TreeOnTilePython/blender_files/anya.obj'
-test_dest = './blender_files/resultThingie.obj'
+#####################################
+#####################################
 
 # This function takes a collection of objs (e.g. bpy.data.objs)
 # and sets the first objeect to be a parent of all others.
@@ -22,14 +25,11 @@ def create_family(family_members):
 
     return parent_obj
 
-# Takes an obj and rotates it and its children in a random angle in the Z axis.
-def randomZRotate(obj):
-    obj.rotation_euler.z = uniform(0, radians(360))
-
 # Takes an obj and finds it minimum and maximum coordinates
 # in the world space. (Accounts for children as well).
-# Returns a tuple of two lists. Minimum and maximum coordinates respectively.
-def getMinMaxWorldCoords(obj):
+# Returns a tuple of two lists. Minimum and maximum coordinates respectively,
+# in the format of [X, Y, Z].
+def get_min_max_world_coords(obj):
     # Get children of obj and put them into a list together.
     family_members = [obj] + list(obj.children)
     # Get all coordinate vectors.
@@ -37,146 +37,97 @@ def getMinMaxWorldCoords(obj):
                      for member in family_members
                      for v in member.data.vertices]
 
-    minCoords = []
-    maxCoords = []
+    min_coords = []
+    max_coords = []
+
+    # Append minimum and maximum coordinates to the arrays.
     for i in range(3):
         vals = [co[i] for co in family_coords]
-        minCoords.append(min(vals))
-        maxCoords.append(max(vals))
+        min_coords.append(min(vals))
+        max_coords.append(max(vals))
 
-    return (minCoords, maxCoords)
+    return (min_coords, max_coords)
 
-
-### FUNCTIONS TO SCALE HEIGHTS.
-"""
-# Sets height of obj
-def setHeight(obj, set_height):
-    minCoords, maxCoords = getMinMaxWorldCoords(obj)
-    height = maxCoords[2] - minCoords[2]
-    scalingHelper(obj, set_height / height)
-
-# Sets height randomly between given min and max height.
-def randomHeight(obj, min_height, max_height):
-    setHeight(obj, uniform(min_height, max_height))
-
-# Decreases height to max_height given if the obj height is larger.
-def bindHeightUpper(obj, max_height):
-    minCoords, maxCoords = getMinMaxWorldCoords(obj)
-    height = maxCoords[2] - minCoords[2]
-    if height > max_height:
-        scalingHelper(obj, max_height / height)
-
-# Increases the height to min_height if the obj height is smaller.
-def bindHeightLower(obj, min_height):
-    minCoords, maxCoords = getMinMaxWorldCoords(obj)
-    height = maxCoords[2] - minCoords[2]
-    if height < min_height:
-        scalingHelper(obj, min_height / height)
-"""
 # Helper function to scale obj down and up.
-def scalingHelper(obj, scaling_factor):
+def scaling_helper(obj, scaling_factor):
     for index in range(3):
          obj.scale[index] *= scaling_factor
+    # Update matrix.
+    bpy.context.view_layer.update()
 
-# General purpose dimension scaler. axis set to 0 for X, 1 for Y, 2 for Z.
-def setDimension(obj, set_dimension, axis):
-    minCoords, maxCoords = getMinMaxWorldCoords(obj)
-    dimension = maxCoords[axis] - minCoords[axis]
-    scalingHelper(obj,  set_dimension / dimension)
 
-def randomDimension(obj, min_dimension, max_dimension, axis):
-    setDimension(obj, uniform(min_dimension, max_dimension), axis)
-
-# Binds dimension to a max_dimension. 
-# I.e. decreases obj dimension to max_dimension if larger.
-def bindDimensionUpper(obj, max_dimension, axis):
-    minCoords, maxCoords = getMinMaxWorldCoords(obj)
-    dimension = maxCoords[axis] - minCoords[axis]
-    if dimension > max_dimension:
-        scalingHelper(obj, max_dimension / dimension)
-
-# Binds dimension to a min_dimension
-# I.e. increases obj dimension to max_dimension if smaller.
-def bindDimensionLower(obj, min_dimension, axis):
-    minCoords, maxCoords = getMinMaxWorldCoords(obj)
-    dimension = maxCoords[axis] - minCoords[axis]
-    if dimension < min_dimension:
-        scalingHelper(obj, min_dimension / dimension)
-
-# Binds all dimensions to the most restrictice max dimension. 
-# Not to confuse with the minMaxCoords.
-def bindAllUpper(obj, max_x, max_y, max_z):
-    minCoords, maxCoords = getMinMaxWorldCoords(obj)
-    obj_dimensions = [maxCoords[i] - minCoords[i] for i in range(3)]
-    max_dimensions = [max_x, max_y, max_z]
-    scaling_factor = min([max_dimensions[i] / obj_dimensions[i] for i in range(3)])
-
-    if scaling_factor < 1:
-        scalingHelper(obj, scaling_factor)
-
-def bindAllLower(obj, min_x, min_y, min_z):
-    minCoords, maxCoords = getMinMaxWorldCoords(obj)
-    obj_dimensions = [maxCoords[i] - minCoords[i] for i in range(3)]
-    min_dimensions = [min_x, min_y, min_z]
-    scaling_factor = min([min_dimensions[i] / obj_dimensions[i] for i in range(3)])
-
-    if scaling_factor > 1:
-        scalingHelper(obj, scaling_factor)
-
-# Bind X, Y dimension to the ones of binding_obj with a margin.
+# Bind X, Y dimensions of obj to the ones of binding_obj with a margin.
 # Also centers the obj onto the coordinates of binding_obj in the X, Y plane.
-# Burrow parameter decides how deep into the binding_obj the object is placed.???
-def placeObjectOn(obj, binding_obj, margin = 0, scaleUp = False):
-    binding_min_coords, binding_max_coords = getMinMaxWorldCoords(binding_obj)
+# Puts the bottom of the obj at the center of binding_obj
+def place_obj_on(obj, binding_obj, margin = 0, scaleUp = False):
+    binding_min_coords, binding_max_coords = get_min_max_world_coords(binding_obj)
     binding_dimensions = [binding_max_coords[i] - binding_min_coords[i] - (2 * margin)
                          for i in range(2)] # Excluding Z coordinate.
-
     binding_center_coords = [(binding_min_coords[i] + binding_max_coords[i]) / 2
                              for i in range(3)]
-    # Add Z coordinate without margins.
     
-    
-    obj_min_coords, obj_max_coords = getMinMaxWorldCoords(obj)
+    obj_min_coords, obj_max_coords = get_min_max_world_coords(obj)
     obj_dimensions = [obj_max_coords[i] - obj_min_coords[i] for i in range(2)]
     
     scaling_factor = min([binding_dimensions[i] / obj_dimensions[i] for i in range(2)])
     if scaling_factor < 1 or scaleUp:
-        scalingHelper(obj, scaling_factor)
+        scaling_helper(obj, scaling_factor)
+        
+        # Update values of object.
+        obj_min_coords, obj_max_coords = get_min_max_world_coords(obj)
+        obj_center_coords = [(obj_min_coords[i] + obj_max_coords[i]) / 2 for i in range(3)]
 
-    obj_min_coords, obj_max_coords = getMinMaxWorldCoords(obj)
-    obj_center_coords = [(obj_min_coords[i] + obj_max_coords[i]) / 2 for i in range(3)]
-
+    # Center obj on binding_obj with respect to XY plane.
     for i in range(2):
         obj.location[i] -= obj_center_coords[i] - binding_center_coords[i]
 
-    # Adjust Z coordinate without margin.
+    # Adjust Z coordinate separately as obj is put ON TOP of binding_obj.
     obj.location[2] -= (obj_min_coords[2] - binding_center_coords[2])
-    ### WHY DOES THIS (NOT) WORK?
+    obj_min_coords, obj_max_coords = get_min_max_world_coords(obj)
+
+    # Update matrix.
+    bpy.context.view_layer.update()
 
 # Imports the model in source to the copied tile file.
 # Places the model on the square tile, then removes it,
 # leaving only the hexagonal tile and the source object.
 # Exports a .obj file at destination.
-def runPlaceObject():
+def run_place_obj(src_file, dest_file):
     # Then import the tiles.
     # bpy.ops.import_scene.obj(filepath=tile_path_absolute)
-    squareTile = bpy.data.objects['squareTile']
+    square_tile = bpy.data.objects['squareTile']
 
     # Import the 3D model and make them a family.
-    bpy.ops.wm.obj_import(filepath=test_source)
+    bpy.ops.wm.obj_import(filepath=src_file)
     family = bpy.context.selected_objects
     if len(family) > 0:
         parent_obj = create_family(family)
         parent_obj.rotation_euler.x -= radians(90)
 
         # Place the object on the square tile
-        placeObjectOn(parent_obj, squareTile, 0.2, True)
+        place_obj_on(parent_obj, square_tile, 0.2, True)
 
 
     # Remove the square tile, leaving only the hexagon tile.
-    bpy.data.objects.remove(squareTile)
+    bpy.data.objects.remove(square_tile)
 
     # Export file as obj.
-    bpy.ops.wm.obj_export(filepath=test_dest)
+    bpy.ops.wm.obj_export(filepath=dest_file)
 
-runPlaceObject()
+    # sys.exit()
+
+# Takes a list of source file paths and destination file paths,
+# then generates "X on Tile" at the destination file paths for each
+# source file.
+def generate_objs(src_files, dest_files):
+    abs_src_files = [os.path.abspath(file_path) for file_path in src_files]
+    abs_dest_files = [os.path.abspath(file_path) for file_path in dest_files]
+
+    for i in range(len(abs_src_files)):
+        for obj in bpy.data.objects:
+            bpy.data.objects.remove(obj)
+        bpy.ops.wm.obj_import(filepath=tile_path)
+    
+        run_place_obj(abs_src_files[i], abs_dest_files[i])
+
+generate_objs(src_paths, dest_paths)
