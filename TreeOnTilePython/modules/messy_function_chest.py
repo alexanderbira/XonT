@@ -63,11 +63,57 @@ def getMinMaxWorldCoords(obj):
 
     return (minCoords, maxCoords)
 
+
 # Helper function to scale obj down and up.
 def scalingHelper(obj, scaling_factor):
     for index in range(3):
          obj.scale[index] *= scaling_factor
     bpy.context.view_layer.update()
+
+# General purpose dimension scaler. axis set to 0 for X, 1 for Y, 2 for Z.
+def setDimension(obj, set_dimension, axis):
+    minCoords, maxCoords = getMinMaxWorldCoords(obj)
+    dimension = maxCoords[axis] - minCoords[axis]
+    scalingHelper(obj,  set_dimension / dimension)
+
+def randomDimension(obj, min_dimension, max_dimension, axis):
+    setDimension(obj, uniform(min_dimension, max_dimension), axis)
+
+# Binds dimension to a max_dimension. 
+# I.e. decreases obj dimension to max_dimension if larger.
+def bindDimensionUpper(obj, max_dimension, axis):
+    minCoords, maxCoords = getMinMaxWorldCoords(obj)
+    dimension = maxCoords[axis] - minCoords[axis]
+    if dimension > max_dimension:
+        scalingHelper(obj, max_dimension / dimension)
+
+# Binds dimension to a min_dimension
+# I.e. increases obj dimension to max_dimension if smaller.
+def bindDimensionLower(obj, min_dimension, axis):
+    minCoords, maxCoords = getMinMaxWorldCoords(obj)
+    dimension = maxCoords[axis] - minCoords[axis]
+    if dimension < min_dimension:
+        scalingHelper(obj, min_dimension / dimension)
+
+# Binds all dimensions to the most restrictice max dimension. 
+# Not to confuse with the minMaxCoords.
+def bindAllUpper(obj, max_x, max_y, max_z):
+    minCoords, maxCoords = getMinMaxWorldCoords(obj)
+    obj_dimensions = [maxCoords[i] - minCoords[i] for i in range(3)]
+    max_dimensions = [max_x, max_y, max_z]
+    scaling_factor = min([max_dimensions[i] / obj_dimensions[i] for i in range(3)])
+
+    if scaling_factor < 1:
+        scalingHelper(obj, scaling_factor)
+
+def bindAllLower(obj, min_x, min_y, min_z):
+    minCoords, maxCoords = getMinMaxWorldCoords(obj)
+    obj_dimensions = [maxCoords[i] - minCoords[i] for i in range(3)]
+    min_dimensions = [min_x, min_y, min_z]
+    scaling_factor = min([min_dimensions[i] / obj_dimensions[i] for i in range(3)])
+
+    if scaling_factor > 1:
+        scalingHelper(obj, scaling_factor)
 
 # Bind X, Y dimension to the ones of binding_obj with a margin.
 # Also centers the obj onto the coordinates of binding_obj in the X, Y plane.
@@ -88,8 +134,6 @@ def placeObjectOn(obj, binding_obj, margin = 0, scaleUp = False):
     scaling_factor = min([binding_dimensions[i] / obj_dimensions[i] for i in range(2)])
     if scaling_factor < 1 or scaleUp:
         scalingHelper(obj, scaling_factor)
-        # Update matrix after scaling.
-        
 
     obj_min_coords, obj_max_coords = getMinMaxWorldCoords(obj)
     obj_dimensions = [obj_max_coords[i] - obj_min_coords[i] for i in range(3)]
@@ -98,8 +142,12 @@ def placeObjectOn(obj, binding_obj, margin = 0, scaleUp = False):
         obj.location[i] -= obj_center_coords[i] - binding_center_coords[i]
 
     # Adjust Z coordinate without margin.
-    obj.location[2] -= (obj_min_coords[2] - binding_center_coords[2])
+    
+    obj.location[2] -= (obj_center_coords[2] - binding_center_coords[2])
+    obj.location[2] += obj_dimensions[2] / 2
     obj_min_coords, obj_max_coords = getMinMaxWorldCoords(obj)
+    bpy.context.view_layer.update()
+    ### WHY DOES THIS (NOT) WORK?
 
 # Imports the model in source to the copied tile file.
 # Places the model on the square tile, then removes it,
@@ -116,6 +164,7 @@ def runPlaceObject(src_file, dest_file):
     if len(family) > 0:
         parent_obj = create_family(family)
         parent_obj.rotation_euler.x -= radians(90)
+        bpy.context.view_layer.update()
 
         # Place the object on the square tile
         placeObjectOn(parent_obj, squareTile, 0.2, True)
@@ -140,5 +189,5 @@ def generate_objs(src_files, dest_files):
     
         runPlaceObject(abs_src_files[i], abs_dest_files[i])
 
-generate_objs([anyaSrcPath, gigaSrcPath], [anyaDestPath, gigaDestPath])
+# generate_objs([anyaSrcPath, gigaSrcPath], [anyaDestPath, gigaDestPath])
 # generate_objs(src_files, dest_files)
