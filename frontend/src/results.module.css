@@ -1,0 +1,11 @@
+.imageContainer {
+  display: flex;
+  flex-flow: row wrap;
+  align-items: center;
+  justify-content: center;
+}
+
+.resultImage {
+  max-width: 200px;
+  max-height: 200px;
+}

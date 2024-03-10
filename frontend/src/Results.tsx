@@ -9,21 +9,36 @@ interface ResultsProps {
 }
 
 export default function Results({ socket }: ResultsProps) {
-  const [numCreated, setNumCreated] = React.useState(0);
+  const [resultNames, setResultNames] = React.useState<String[]>([]);
   const [allLoaded, setAllLoaded] = React.useState(false);
 
   React.useEffect(() => {
-    socket.emit("create_results");
-    socket.on("next_completed", () => setNumCreated(n => n + 1));
+    socket.on("next_completed", ({ object }) => {
+      setResultNames(currNames => [...currNames, object]);
+      socket.emit("create_results");
+    });
+
     socket.on("all_completed", () => setAllLoaded(true));
+
+    socket.emit("create_results");
   }, []);
 
   return (
     <div>
       {
-        !allLoaded && <p>Generating model {numCreated + 1}...</p>
+        !allLoaded && <p>Generating image {resultNames.length + 1}...</p>
       }
-      {/* Load all the completed models here */}
+      <div className={resultsStyles.imageContainer}>
+        {
+          resultNames.map((name, i) =>
+            <img
+              src={`/result-${name}.png`}
+              key={i}
+              className={resultsStyles.resultImage}
+            />
+          )
+        }
+      </div>
     </div>
   );
 }

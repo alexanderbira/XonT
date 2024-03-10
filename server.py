@@ -1,17 +1,20 @@
-from flask import Flask, jsonify, send_from_directory, request, send_file, redirect
+from flask import Flask, jsonify, send_from_directory, request, send_file
 import os
 from flask_socketio import SocketIO
 from StyleGeneration import StyleGenerator
+from ImageGeneration import ImageGenerator 
 
 app = Flask(__name__, 
             static_folder="frontend/build",
-            static_url_path=''
+            static_url_path='',
             )
 app.config["UPLOAD_FOLDER"] = "images/"
-socketio = SocketIO(app)
+socketio = SocketIO(app, async_mode='threading')
 
 # this list stores the strings of names of objects we want to generate
 objectList = []
+# this generator returns the final image results
+result_generator = None
 
 @app.route("/") 
 def serve():
@@ -49,6 +52,14 @@ def give_evaluated_image():
     return send_file("images/style_image.png", mimetype='image/png')
   return "Error", 404
 
+# the src properties of the final img elements
+@app.route("/result-<obj>.png")
+def give_result_image(obj):
+  if os.path.exists("images/result_"+obj+".png"):
+    return send_file("images/result_"+obj+".png", mimetype='image/png')
+  return "not found", 404
+
+# reject a generated style image
 @app.route("/reject-image", methods = ["POST"])
 def reject_image():
   content = request.json
@@ -57,18 +68,31 @@ def reject_image():
     "success": "generating style image..."
   })
 
-# TODO
+# called when a new final result is required
 @socketio.on("create_results")
 def handle_connect():
-  print('Starting 3d...')
-  # call the 3d model generation scripts
+  global result_generator
 
-  # send web socket "next_completed" after each completion
-  # add a function to serve the 3d models
+  if not os.path.exists("images"):
+    os.makedirs("images")
 
-  # send web socket "all_completed" when all completed
+  if result_generator is None:
+    result_generator = ImageGenerator(
+      "images/style_image.png",
+      objectList
+    ).generator()
 
+  next_img = next(result_generator, None)
 
+  # all things in objectList have been made into images already
+  if next_img is None:
+    socketio.emit('all_completed', include_self=True)
+    result_generator = None
+    return
+  
+  # take the next thing from objectList and make it into an image
+  socketio.emit('next_completed', {"object": next_img}, include_self=True)
+  
 
 
 def generate_style_image(word):
