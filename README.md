@@ -9,6 +9,15 @@ Then, any other objects that are required are generated in a consistent style, a
 
 We have provided a demo in Unity of how these assets could be used, with a hover script in C# that can be attached to the tiles so that when the cursor is on the object, the object hovers, and it can be selected to take the user playing the game to a different scene, similar to a level selection screen.
 
+# How we used sponsor technology
+
+Stability.ai is at the core of the 3D object generation pipeline, firstly through the developer API and stable-diffusion LX model:
+• We used the Text-to-Image service to generate an initial style reference, injecting
+the users object word into a prompt specifying basic properties such as the quantity and orientation.
+• We then used Image-to-Image to generate the images to be converted to 3D objects, starting with the style image, and combining with the user object words (alongside additional prompting as before) to produce high quality images of 3D
+models in consistent style.
+Secondly, leveraging the Stability.ai open-source stable-zero123, we locally trained the model allowing us to convert the previously generated images into 3D models.
+
 # Demonstration Images
 ##### Figure 1: The initial prompt screen
 !(https://github.com/alexanderbira/XonT/blob/main/demos/imgs/Figure%201.png)
