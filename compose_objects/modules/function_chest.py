@@ -1,10 +1,10 @@
 import bpy
 import os
+import shutil
 from math import radians
 
 dir_path_list = os.path.dirname(__file__).split("/")[:-2]
 x_on_t_path = '/'.join(dir_path_list)
-print(x_on_t_path)
 
 # Loading source paths and destination paths.
 src_model_dir = x_on_t_path + '/images/models'
@@ -18,7 +18,8 @@ dest_sub_dirs = [(dest_model_dir + "/" + sub_dir)
 
 # Create destination sub directories.
 for sub_dir in dest_sub_dirs:
-    os.mkdir(sub_dir)
+    if not os.path.exists(sub_dir):
+        os.mkdir(sub_dir)
 
 src_paths = []
 dest_paths = []
@@ -138,7 +139,8 @@ def run_place_obj(src_file, dest_file):
     bpy.data.objects.remove(square_tile)
 
     # Export file as obj.
-    bpy.ops.wm.obj_export(filepath=dest_file)
+    bpy.ops.wm.obj_export(filepath=dest_file, check_existing=False)
+    bpy.ops.export_scene.fbx(filepath=(dest_file[:-3] + "fbx"), check_existing=False)
 
     # sys.exit()
 
