@@ -18,7 +18,7 @@ def StyleGenerator(in_prompt, abs = ""):
 
     # Paste your API Key below.
 
-    os.environ['STABILITY_KEY'] = "your api key here :P"
+    os.environ['STABILITY_KEY'] = "sk-lKadva3CI31g12p2piPTTrcHoCA8BPvCE3odMQCw54CpnBd9"
 
 
     # Set up our connection to the API.
