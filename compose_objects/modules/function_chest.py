@@ -5,10 +5,32 @@ from math import radians
 # Loading source paths and destination paths.
 src_model_dir = os.path.abspath('images/models')
 dest_model_dir = os.path.abspath('images/tiles')
-src_paths = ['images/models' + file_name for file_name in os.listdir(src_model_dir)]
-dest_paths = ['images/tiles' + file_name for file_name in os.listdir(src_model_dir)]
+
+listDir = [dir for dir in os.listdir(src_model_dir) if dir[0] != "."]
+src_sub_dirs = [(src_model_dir + "/" + sub_dir) 
+                for sub_dir in listDir]
+dest_sub_dirs = [(dest_model_dir + "/" + sub_dir) 
+                 for sub_dir in listDir]
+
+# Create destination sub directories.
+for sub_dir in dest_sub_dirs:
+    os.mkdir(sub_dir)
+
+src_paths = []
+dest_paths = []
+for i in range(len(src_sub_dirs)):
+    src_sub_dir = src_sub_dirs[i]
+    dest_sub_dir = dest_sub_dirs[i]
+    for file_name in os.listdir(src_sub_dirs[i]):
+        file_ending = file_name.split(".")[-1]
+        if file_ending == "obj":
+            src_paths.append(src_sub_dir + "/" + file_name)
+            dest_paths.append(dest_sub_dir + "/" + file_name)
+        if file_ending == "jpg":
+            shutil.copy(src_sub_dir + "/" + file_name, dest_sub_dir + "/" + file_name)
+
 # Path to base tile.
-tile_path = os.path.abspath('TreeOnTilePython/baseTiles/baseTile.obj')
+tile_path = os.path.abspath('compose_objects/baseTiles/baseTile.obj')
 
 #####################################
 #####################################
