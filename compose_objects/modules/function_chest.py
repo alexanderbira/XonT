@@ -2,9 +2,13 @@ import bpy
 import os
 from math import radians
 
+dir_path_list = os.path.dirname(__file__).split("/")[:-2]
+x_on_t_path = '/'.join(dir_path_list)
+print(x_on_t_path)
+
 # Loading source paths and destination paths.
-src_model_dir = os.path.abspath('images/models')
-dest_model_dir = os.path.abspath('images/tiles')
+src_model_dir = x_on_t_path + '/images/models'
+dest_model_dir = x_on_t_path + '/images/tiles'
 
 listDir = [dir for dir in os.listdir(src_model_dir) if dir[0] != "."]
 src_sub_dirs = [(src_model_dir + "/" + sub_dir) 
@@ -30,7 +34,7 @@ for i in range(len(src_sub_dirs)):
             shutil.copy(src_sub_dir + "/" + file_name, dest_sub_dir + "/" + file_name)
 
 # Path to base tile.
-tile_path = os.path.abspath('compose_objects/baseTiles/baseTile.obj')
+tile_path = os.path.abspath(x_on_t_path + '/compose_objects/baseTiles/baseTile.obj')
 
 #####################################
 #####################################
