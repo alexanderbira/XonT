@@ -11,11 +11,12 @@ We have provided a demo in Unity of how these assets could be used, with a hover
 
 # Demonstration Images
 ##### Figure 1: The initial prompt screen
-![[Pasted image 20240310101901.png]]
+!(https://github.com/alexanderbira/XonT/blob/main/demos/imgs/Figure%201.png)
 
 ##### Figure 2: Deciding on the style that objects will be generated in
-![[Pasted image 20240310102021.png]]
+!(https://github.com/alexanderbira/XonT/blob/main/demos/imgs/Figure%202.png)
 
 ##### Figure 3: Screen providing transparent images that can be sent to Google Colab
-![[Pasted image 20240310102259.png]]
+!(https://github.com/alexanderbira/XonT/blob/main/demos/imgs/Figure%203.png)
+
 
