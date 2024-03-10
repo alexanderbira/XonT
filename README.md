@@ -20,14 +20,14 @@ Secondly, leveraging the Stability.ai open-source stable-zero123, we locally tra
 
 # Demonstration Images
 ##### Figure 1: The initial prompt screen
-!(https://github.com/alexanderbira/XonT/blob/main/demos/imgs/Figure%201.png)
+![](https://github.com/alexanderbira/XonT/blob/main/demos/imgs/Figure%201.png)
 
 ##### Figure 2: Deciding on the style that objects will be generated in
-!(https://github.com/alexanderbira/XonT/blob/main/demos/imgs/Figure%202.png)
+![](https://github.com/alexanderbira/XonT/blob/main/demos/imgs/Figure%202.png)
 
 ##### Figure 3: Screen providing transparent images that can be sent to Google Colab
-!(https://github.com/alexanderbira/XonT/blob/main/demos/imgs/Figure%203.png)
+![](https://github.com/alexanderbira/XonT/blob/main/demos/imgs/Figure%203.png)
 
 ##### Figure 4: Unity Scene view of the demo, with example tiles in scene
-!(https://github.com/alexanderbira/XonT/blob/main/demos/imgs/Figure%204.png)
+![](https://github.com/alexanderbira/XonT/blob/main/demos/imgs/Figure%204.png)
 
