@@ -28,4 +28,6 @@ Secondly, leveraging the Stability.ai open-source stable-zero123, we locally tra
 ##### Figure 3: Screen providing transparent images that can be sent to Google Colab
 !(https://github.com/alexanderbira/XonT/blob/main/demos/imgs/Figure%203.png)
 
+##### Figure 4: Unity Scene view of the demo, with example tiles in scene
+!(https://github.com/alexanderbira/XonT/blob/main/demos/imgs/Figure%204.png)
 
